@@ -10,3 +10,7 @@ class TestReader:
 
         assert reader.electrode_surface_area == 0.046
         assert abs(reader.get_potential_shift() - 1.19785) < 1e-5
+
+        logj, ircp = reader.get_tafel_plot()
+        assert len(logj) == 35
+        assert len(ircp) == 35

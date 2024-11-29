@@ -27,7 +27,7 @@ pyright = "pyright ."
 ruff_lint = "ruff check ."
 ruff_format = "ruff format ."
 ruff_fix = "ruff check --fix-only ."
-test = "pytest tests --cov=app --cov-report=term --cov-report=xml"
+test = "pytest tests --cov=tafel --cov-report=term --cov-report=xml"
 format = { composite = ["ruff_fix", "ruff_format"] }
 lint = { composite = ["ruff_lint", "pyright"] }
 check = { composite = ["format", "lint", "test"] }
