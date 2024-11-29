@@ -21,8 +21,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
-        python-version: 3.11
-        cache: true
+        with:
+          python-version: 3.11
+          cache: true
       - name: Install dependencies
         run: pdm install --dev
       - name: Check code quality
