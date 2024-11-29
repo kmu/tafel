@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "dev"]
+groups = ["default", "dev", "ruff"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
 content_hash = "sha256:1487b107590b704c02f64d55769e1b53eb23a644498160c5e1c0cc08f2cc2234"
