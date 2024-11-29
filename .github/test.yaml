@@ -1,0 +1,9 @@
+steps:
+  - uses: actions/checkout@v4
+  - name: Setup PDM
+    uses: pdm-project/setup-pdm@v4
+    # You are now able to use PDM in your workflow
+  - name: Install dependencies
+    run: pdm install
+  - name: Check code quality
+    run: pdm run check
