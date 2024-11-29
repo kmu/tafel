@@ -8,11 +8,11 @@ class Reader:
     def __init__(
         self,
         ph: float = 13,
-        ag_agcl_3m_nacl_v_vs_nhe: float = 0.222,
+        reference_potential: float = 0.210,
         electrolyte_resistance: float = 0.05,
     ) -> None:
         self.ph = ph
-        self.ag_agcl_3m_nacl_v_vs_nhe = ag_agcl_3m_nacl_v_vs_nhe
+        self.reference_potential = reference_potential
         self.electrolyte_resistance = electrolyte_resistance
 
     def read_mpt(self, path: str) -> None:
@@ -28,7 +28,7 @@ class Reader:
         self.electrode_surface_area = float(contents)
 
     def get_potential_shift(self) -> float:
-        return self.ph * 0.0591 + self.ag_agcl_3m_nacl_v_vs_nhe
+        return self.ph * 0.0591 + self.reference_potential
 
     def get_log_j(self) -> pd.Series:
         j = self.get_j()
