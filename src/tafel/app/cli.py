@@ -26,7 +26,11 @@ def main() -> None:
         Ag/AgCl (seawater): 0.266 V""",
     )
     parser.add_argument(
-        "-e", "--electrolyte-resistance (default: 0.05)", type=float, default=0.05
+        "-e",
+        "--electrolyte-resistance",
+        type=float,
+        default=0.05,
+        help="Electrolyte resistance in ohms (default: 0.05)",
     )
 
     args = parser.parse_args()
