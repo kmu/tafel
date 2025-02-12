@@ -32,7 +32,9 @@ class Reader:
 
     def get_log_j(self) -> np.ndarray:
         j = self.get_j()
-        return np.log10(j / 1000)
+        # Suppress divide by zero warning
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return np.log10(j / 1000)  # Convert to A/cm2
 
     def get_j(self, cycle_number: int = -1) -> pd.Series:
         sdf = self.df[self.df["cycle number"] == cycle_number] if cycle_number >= 0 else self.df
