@@ -6,9 +6,7 @@ from tafel.core.reader import Reader
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", type=str, required=True)
-    parser.add_argument(
-        "-p", "--ph", type=float, default=13, help="pH of the electrolyte (default: 13)"
-    )
+    parser.add_argument("-p", "--ph", type=float, default=13, help="pH of the electrolyte (default: 13)")
     parser.add_argument(
         "-r",
         "--reference-potential",
@@ -25,9 +23,7 @@ def main() -> None:
         Ag/AgCl/0.6 mol/kg KCl: 0.250 V
         Ag/AgCl (seawater): 0.266 V""",
     )
-    parser.add_argument(
-        "-e", "--electrolyte-resistance (default: 0.05)", type=float, default=0.05
-    )
+    parser.add_argument("-e", "--electrolyte-resistance (default: 0.05)", type=float, default=0.05)
 
     args = parser.parse_args()
 
