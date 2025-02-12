@@ -72,7 +72,7 @@ def main() -> None:
         output_dir=args.output,
         forbidden_idxs=[],
     )
-    x, y = reader.get_xy()
+    x, y = reader.get_tafel_plot()
 
     opt.fit(x=x, y=y)
 

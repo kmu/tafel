@@ -58,6 +58,3 @@ class Reader:
         self.iR = ia * self.electrolyte_resistance
 
         return self.E_vs_RHE_V - self.iR
-
-    def get_xy(self) -> tuple[np.ndarray, np.ndarray]:
-        return self.get_log_j(), self.get_ir_corrected_potential()
