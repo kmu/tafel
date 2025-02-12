@@ -40,12 +40,11 @@ line-length = 119
 select = [
     "ALL"
 ]
-ignore = [
+lint.ignore = [
   "D",
   "COM812",
   "ISC001",
   "T201", # Do not use print
-  "ANN101",
   "ANN401", # Dynamically typed expressions (typing.Any) are disallowed
 ]
 
