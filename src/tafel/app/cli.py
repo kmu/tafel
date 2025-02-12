@@ -72,7 +72,9 @@ def main() -> None:
         output_dir=args.output,
         forbidden_idxs=[],
     )
-    opt.fit(x=reader.get_log_j(), y=reader.get_ir_corrected_potential())
+    x, y = reader.get_xy()
+
+    opt.fit(x=x, y=y)
 
 
 if __name__ == "__main__":
