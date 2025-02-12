@@ -6,12 +6,10 @@ import optuna
 import optuna.logging
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.io as pio
 from scipy.stats import linregress
 from sklearn.metrics import r2_score
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
-
 
 ggplot_palette = [
     "#E41A1C",  # Red
@@ -197,8 +195,8 @@ class BayesianOptimizer:
         # Optionally, update layout if needed
         tafel_fig.data[0].marker.size = 4  # type: ignore[attr-defined]
 
-        pio.write_image(tafel_fig, self.output_dir / "optfit.png")
-        pio.write_image(tafel_fig, self.output_dir / "optfit.pdf")
+        tafel_fig.write_image(self.output_dir / "optfit.png")
+        tafel_fig.write_image(self.output_dir / "optfit.pdf")
         for study_i, (study, result) in enumerate(zip(studies, fit_results, strict=True)):
             i1, i2, res = result
 
@@ -238,14 +236,14 @@ class BayesianOptimizer:
                 y=df_study_r2_positive.values_0,
             )
             study_fig = go.Figure(data=[line_trace])
-            pio.write_image(study_fig, self.output_dir / f"study_r2_{study_i}.pdf")
+            study_fig.write_image(self.output_dir / f"study_r2_{study_i}.pdf")
 
             line_trace = go.Scatter(
                 x=df_study_r2_positive.number,
                 y=df_study_r2_positive.values_1,
             )
             study_fig = go.Figure(data=[line_trace])
-            pio.write_image(study_fig, self.output_dir / f"study_num_{study_i}.pdf")
+            study_fig.write_image(self.output_dir / f"study_num_{study_i}.pdf")
 
             contour_fig = optuna.visualization.plot_contour(
                 study=study,
@@ -349,7 +347,7 @@ class BayesianOptimizer:
             },
         )
 
-        pio.write_image(tafel_fig, self.output_dir / "tafel_fig.png")
+        tafel_fig.write_image(self.output_dir / "tafel_fig.png")
 
         raw_csv_path = self.output_dir / "x_y_data.csv"
         pd.DataFrame({"x": x, "y": y}).to_csv(raw_csv_path, index=False)
