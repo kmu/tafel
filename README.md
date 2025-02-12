@@ -6,6 +6,8 @@ This tool is currently in an experimental stage.
 
 ## How to install
 
+Requirements: Python 3.11 or above
+
 ```
 pip install tafel
 ```
@@ -13,7 +15,7 @@ pip install tafel
 ## How to use
 
 ```
-tafel path/to/mpt/file.mpt --reference-potential 0.210 --ph 13 --electrolyte-resistance 0.05
+tafel -f path/to/mpt/file.mpt --reference-potential 0.210 --ph 13 --electrolyte-resistance 0.05
 ```
 
 
