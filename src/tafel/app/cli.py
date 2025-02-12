@@ -17,7 +17,6 @@ def main() -> None:
     )
     parser.add_argument("-t", "--trials", type=int, default=100, help="Number of trials (default: 100)")
     parser.add_argument(
-        "--r2",
         "--r2-threshold",
         type=float,
         default=0.9999,
@@ -48,7 +47,13 @@ def main() -> None:
         Ag/AgCl/0.6 mol/kg KCl: 0.250 V
         Ag/AgCl (seawater): 0.266 V""",
     )
-    parser.add_argument("-e", "--electrolyte-resistance (default: 0.05)", type=float, default=0.05)
+    parser.add_argument(
+        "-e",
+        "--electrolyte-resistance",
+        type=float,
+        default=0.05,
+        help="Electrolyte resistance (default: 0.05)",
+    )
 
     args = parser.parse_args()
 
