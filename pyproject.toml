@@ -28,7 +28,7 @@ black_format = "black ."
 ruff_lint = "ruff check ."
 ruff_format = "ruff format ."
 ruff_fix = "ruff check --fix-only ."
-test = "pytest tests --cov=tafel.core --cov-report=term --cov-report=xml"
+test = "pytest tests --cov=tafel.core --cov-report=term --cov-report=xml --junitxml=junit.xml -o junit_family=legacy"
 format = { composite = ["black_format", "ruff_fix", "ruff_format"] }
 lint = { composite = ["ruff_lint", "pyright"] }
 check = { composite = ["format", "lint", "test"] }
