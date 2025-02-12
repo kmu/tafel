@@ -30,7 +30,7 @@ class Reader:
     def get_potential_shift(self) -> float:
         return self.ph * 0.0591 + self.reference_potential
 
-    def get_log_j(self) -> pd.Series:
+    def get_log_j(self) -> np.ndarray:
         j = self.get_j()
         return np.log10(j / 1000)
 
@@ -44,7 +44,7 @@ class Reader:
 
         return logj, ircp
 
-    def get_ir_corrected_potential(self) -> pd.Series:
+    def get_ir_corrected_potential(self) -> np.ndarray:
         potential_shift = self.get_potential_shift()
         self.E_vs_RHE_V = self.df["Ewe/V"] + potential_shift
 
