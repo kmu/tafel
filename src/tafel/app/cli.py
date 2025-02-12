@@ -31,6 +31,13 @@ def main() -> None:
         "-l", "--lines", type=int, default=2, help="Number of lines (default: 2)"
     )
     parser.add_argument(
+        "-pt",
+        "--points-threshold",
+        type=int,
+        default=5,
+        help="Number of points threshold (default: 10)",
+    )
+    parser.add_argument(
         "-r",
         "--reference-potential",
         type=float,
@@ -62,7 +69,7 @@ def main() -> None:
     opt = BayesianOptimizer(
         trials=args.trials,
         r2_threshold=args.r2_threshold,
-        points=args.points,
+        points_threshold=args.points_threshold,
         lines=args.lines,
         output_dir=args.output,
     )
