@@ -162,6 +162,7 @@ class BayesianOptimizer:
             lines=self.lines,
             forbidden_idxs=forbidden_idxs,
         )
+
         for i, result in enumerate(fit_results):
             i1, i2, res = result
             _x = x[i1:i2]
