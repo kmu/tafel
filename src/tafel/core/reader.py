@@ -35,7 +35,11 @@ class Reader:
         return np.log10(j / 1000)
 
     def get_j(self, cycle_number: int = -1) -> pd.Series:
-        sdf = self.df[self.df["cycle number"] == cycle_number] if cycle_number >= 0 else self.df
+        sdf = (
+            self.df[self.df["cycle number"] == cycle_number]
+            if cycle_number >= 0
+            else self.df
+        )
         return sdf["<I>/mA"] / self.electrode_surface_area  # mA/cm2
 
     def get_tafel_plot(self) -> tuple:
