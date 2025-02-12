@@ -55,12 +55,9 @@ def objective_find_line(
         _x = np.array(_x)
         _y = np.array(_y)
 
-        try:
-            res = linregress(_x, _y)
-            predictions = _x * res.slope + res.intercept  # type: ignore[attr-defined]
-            r2: float = float(r2_score(_y, predictions))
-        except ValueError:
-            return 0.0, 0
+        res = linregress(_x, _y)
+        predictions = _x * res.slope + res.intercept  # type: ignore[attr-defined]
+        r2: float = float(r2_score(_y, predictions))
 
         return r2, n_points
 
@@ -162,6 +159,7 @@ class BayesianOptimizer:
             lines=self.lines,
             forbidden_idxs=forbidden_idxs,
         )
+
         for i, result in enumerate(fit_results):
             i1, i2, res = result
             _x = x[i1:i2]
@@ -211,17 +209,12 @@ class BayesianOptimizer:
                 i2 = int(row["params_i2"])
                 _x = x[i1:i2]
                 _y = y[i1:i2]
-                try:
-                    res = linregress(_x, _y)
-                    slopes.append(res.slope)  # type: ignore[attr-defined]
-                    intercepts.append(res.intercept)  # type: ignore[attr-defined]
-                    x_mins.append(np.min(_x))
-                    x_maxs.append(np.max(_x))
-                except ValueError:
-                    slopes.append(np.nan)
-                    intercepts.append(np.nan)
-                    x_mins.append(np.nan)
-                    x_maxs.append(np.nan)
+
+                res = linregress(_x, _y)
+                slopes.append(res.slope)  # type: ignore[attr-defined]
+                intercepts.append(res.intercept)  # type: ignore[attr-defined]
+                x_mins.append(np.min(_x))
+                x_maxs.append(np.max(_x))
 
             df_study["slope"] = slopes
             df_study["intercept"] = intercepts
@@ -259,26 +252,24 @@ class BayesianOptimizer:
                 xaxis={"title": ""},
                 yaxis={"title": ""},
             )
-            try:
-                contour_fig.write_image(self.output_dir / f"contour_{study_i}-R2.png")
-                contour_fig.write_image(self.output_dir / f"contour_{study_i}-R2.pdf")
-                contour_fig = optuna.visualization.plot_contour(
-                    study=study,
-                    params=["i1", "i2"],
-                    target=lambda t: t.values[1],  # noqa: PD011
-                    target_name="n",
-                )
-                contour_fig.update_layout(
-                    font={"family": "Helvetica", "size": 32},
-                    width=550,
-                    height=500,
-                    title="",
-                    xaxis={"title": ""},
-                    yaxis={"title": ""},
-                )
-                contour_fig.write_image(self.output_dir / f"contour_{study_i}-n.pdf")
-            except ValueError:
-                pass
+
+            contour_fig.write_image(self.output_dir / f"contour_{study_i}-R2.png")
+            contour_fig.write_image(self.output_dir / f"contour_{study_i}-R2.pdf")
+            contour_fig = optuna.visualization.plot_contour(
+                study=study,
+                params=["i1", "i2"],
+                target=lambda t: t.values[1],  # noqa: PD011
+                target_name="n",
+            )
+            contour_fig.update_layout(
+                font={"family": "Helvetica", "size": 32},
+                width=550,
+                height=500,
+                title="",
+                xaxis={"title": ""},
+                yaxis={"title": ""},
+            )
+            contour_fig.write_image(self.output_dir / f"contour_{study_i}-n.pdf")
 
         return studies, fit_results
 

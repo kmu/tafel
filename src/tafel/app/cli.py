@@ -17,10 +17,9 @@ def main() -> None:
     )
     parser.add_argument("-t", "--trials", type=int, default=100, help="Number of trials (default: 100)")
     parser.add_argument(
-        "--r2",
         "--r2-threshold",
         type=float,
-        default=0.9999,
+        default=0.999,
         help="R2 threshold (default: 0.9999)",
     )
     parser.add_argument("-l", "--lines", type=int, default=2, help="Number of lines (default: 2)")
@@ -48,7 +47,13 @@ def main() -> None:
         Ag/AgCl/0.6 mol/kg KCl: 0.250 V
         Ag/AgCl (seawater): 0.266 V""",
     )
-    parser.add_argument("-e", "--electrolyte-resistance (default: 0.05)", type=float, default=0.05)
+    parser.add_argument(
+        "-e",
+        "--electrolyte-resistance",
+        type=float,
+        default=0.05,
+        help="Electrolyte resistance (default: 0.05)",
+    )
 
     args = parser.parse_args()
 
@@ -67,7 +72,9 @@ def main() -> None:
         output_dir=args.output,
         forbidden_idxs=[],
     )
-    opt.fit(x=reader.get_log_j(), y=reader.get_ir_corrected_potential())
+    x, y = reader.get_tafel_plot()
+
+    opt.fit(x=x, y=y)
 
 
 if __name__ == "__main__":
