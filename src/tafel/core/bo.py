@@ -26,7 +26,7 @@ ggplot_palette = [
 
 
 def objective_find_line(
-    x: np.array, y: np.array, forbidden: list[int] | None = None
+    x: np.ndarray, y: np.ndarray, forbidden: list[int] | None = None
 ) -> Callable[[optuna.trial.Trial], tuple[float, int]]:
     """
     x: np.array. log10(j) (mA/cm2)
@@ -49,7 +49,7 @@ def objective_find_line(
 
         # Check if there are common elements
         if common_elements:
-            return 0, 0
+            return 0.0, 0
 
         _x = x[idx1:idx2]
         _y = y[idx1:idx2]
@@ -59,11 +59,10 @@ def objective_find_line(
 
         try:
             res = linregress(_x, _y)
-            predictions = _x * res.slope + res.intercept
-
-            r2 = r2_score(_y, predictions)
+            predictions = _x * res.slope + res.intercept  # type: ignore[attr-defined]
+            r2: float = float(r2_score(_y, predictions))
         except ValueError:
-            return 0, 0
+            return 0.0, 0
 
         return r2, n_points
 
@@ -71,14 +70,14 @@ def objective_find_line(
 
 
 def perform_bayesian_optimization(
-    x: np.array,
-    y: np.array,
+    x: np.ndarray,
+    y: np.ndarray,
     trials: int,
     r2_threshold: float,
     points_threshold: int,
     lines: int,
     forbidden_idxs: list[int],
-) -> tuple[list[tuple[int, int, linregress]], list[optuna.study.Study]]:
+) -> tuple[list[tuple[int, int, linregress]], list[optuna.study.Study]]:  # type: ignore[type-arg]
     fit_results = []
     studies = []
     old_studies: list[optuna.study.Study] = []
@@ -95,12 +94,10 @@ def perform_bayesian_optimization(
                 common_elements = set(list1).intersection(forbidden_idxs)
 
                 # Check if there are common elements
-                values = (0, 0) if common_elements else t.to_numpy()
+                values = (0, 0) if common_elements else t.values  # noqa: PD011
 
                 study.add_trial(
-                    optuna.trial.create_trial(
-                        params=t.params, values=values, distributions=t.distributions
-                    )
+                    optuna.trial.create_trial(params=t.params, values=values, distributions=t.distributions)
                 )
 
         study.optimize(
@@ -116,9 +113,7 @@ def perform_bayesian_optimization(
         if df_trials.empty:
             continue
 
-        max_entry = df_trials.sort_values(
-            by=["values_1", "values_0"], ascending=[False, False]
-        ).iloc[0]
+        max_entry = df_trials.sort_values(by=["values_1", "values_0"], ascending=[False, False]).iloc[0]
         i1 = int(max_entry["params_i1"])
         i2 = int(max_entry["params_i2"])
 
@@ -153,8 +148,8 @@ class BayesianOptimizer:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def fit(  # noqa: PLR0915
-        self, x: np.array, y: np.array
-    ) -> tuple[list[optuna.study.Study], list[tuple[int, int, linregress]]]:
+        self, x: np.ndarray, y: np.ndarray
+    ) -> tuple[list[optuna.study.Study], list[tuple[int, int, linregress]]]:  # type: ignore[type-arg]
         tafel_fig = self.save_raw_data(x, y)
 
         fit_idxs = []
@@ -179,9 +174,7 @@ class BayesianOptimizer:
             x_min = np.nanmin(filtered_x)
             x_max = np.nanmax(filtered_x)
 
-            x_range = np.linspace(
-                x_min, x_max, 100
-            )  # Generate 100 points for a smooth line
+            x_range = np.linspace(x_min, x_max, 100)  # Generate 100 points for a smooth line
             y_line = res.slope * x_range + res.intercept
 
             # Select color from the palette
@@ -202,19 +195,15 @@ class BayesianOptimizer:
             forbidden_idxs.extend(range(i1, i2))
 
         # Optionally, update layout if needed
-        tafel_fig.data[0].marker.size = 4
+        tafel_fig.data[0].marker.size = 4  # type: ignore[attr-defined]
 
         pio.write_image(tafel_fig, self.output_dir / "optfit.png")
         pio.write_image(tafel_fig, self.output_dir / "optfit.pdf")
-        for study_i, (study, result) in enumerate(
-            zip(studies, fit_results, strict=True)
-        ):
+        for study_i, (study, result) in enumerate(zip(studies, fit_results, strict=True)):
             i1, i2, res = result
 
             df_study = study.trials_dataframe()
-            df_study["is_best"] = (df_study.params_i1 == i1) & (
-                df_study.params_i2 == i2
-            )
+            df_study["is_best"] = (df_study.params_i1 == i1) & (df_study.params_i2 == i2)
             slopes = []
             intercepts = []
             x_mins = []
@@ -226,8 +215,8 @@ class BayesianOptimizer:
                 _y = y[i1:i2]
                 try:
                     res = linregress(_x, _y)
-                    slopes.append(res.slope)
-                    intercepts.append(res.intercept)
+                    slopes.append(res.slope)  # type: ignore[attr-defined]
+                    intercepts.append(res.intercept)  # type: ignore[attr-defined]
                     x_mins.append(np.min(_x))
                     x_maxs.append(np.max(_x))
                 except ValueError:
@@ -261,7 +250,7 @@ class BayesianOptimizer:
             contour_fig = optuna.visualization.plot_contour(
                 study=study,
                 params=["i1", "i2"],
-                target=lambda t: t.to_numpy()[0],
+                target=lambda t: t.values[0],  # noqa: PD011
                 target_name="R2",
             )
             contour_fig.update_layout(
@@ -278,7 +267,7 @@ class BayesianOptimizer:
                 contour_fig = optuna.visualization.plot_contour(
                     study=study,
                     params=["i1", "i2"],
-                    target=lambda t: t.to_numpy()[1],
+                    target=lambda t: t.values[1],  # noqa: PD011
                     target_name="n",
                 )
                 contour_fig.update_layout(
@@ -295,7 +284,7 @@ class BayesianOptimizer:
 
         return studies, fit_results
 
-    def save_raw_data(self, x: np.array, y: np.array) -> go.Figure:
+    def save_raw_data(self, x: np.ndarray, y: np.ndarray) -> go.Figure:
         trace = go.Scatter(
             x=x,
             y=y,

@@ -7,9 +7,7 @@ from tafel.core.reader import Reader
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", type=str, required=True)
-    parser.add_argument(
-        "-p", "--ph", type=float, default=13, help="pH of the electrolyte (default: 13)"
-    )
+    parser.add_argument("-p", "--ph", type=float, default=13, help="pH of the electrolyte (default: 13)")
     parser.add_argument(
         "-o",
         "--output",
@@ -17,9 +15,7 @@ def main() -> None:
         default="tafel_plot",
         help="Output directory name (default: tafel_plot)",
     )
-    parser.add_argument(
-        "-t", "--trials", type=int, default=100, help="Number of trials (default: 100)"
-    )
+    parser.add_argument("-t", "--trials", type=int, default=100, help="Number of trials (default: 100)")
     parser.add_argument(
         "--r2",
         "--r2-threshold",
@@ -27,9 +23,8 @@ def main() -> None:
         default=0.9999,
         help="R2 threshold (default: 0.9999)",
     )
-    parser.add_argument(
-        "-l", "--lines", type=int, default=2, help="Number of lines (default: 2)"
-    )
+    parser.add_argument("-l", "--lines", type=int, default=2, help="Number of lines (default: 2)")
+
     parser.add_argument(
         "-pt",
         "--points-threshold",
@@ -53,9 +48,7 @@ def main() -> None:
         Ag/AgCl/0.6 mol/kg KCl: 0.250 V
         Ag/AgCl (seawater): 0.266 V""",
     )
-    parser.add_argument(
-        "-e", "--electrolyte-resistance (default: 0.05)", type=float, default=0.05
-    )
+    parser.add_argument("-e", "--electrolyte-resistance (default: 0.05)", type=float, default=0.05)
 
     args = parser.parse_args()
 
@@ -72,8 +65,9 @@ def main() -> None:
         points_threshold=args.points_threshold,
         lines=args.lines,
         output_dir=args.output,
+        forbidden_idxs=[],
     )
-    opt.fit(x=reader.get_log_j(), y=reader.get_potential_shift())
+    opt.fit(x=reader.get_log_j(), y=reader.get_ir_corrected_potential())
 
 
 if __name__ == "__main__":
