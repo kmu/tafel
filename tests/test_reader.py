@@ -1,4 +1,4 @@
-from tafel.core.reader import Reader
+from tafel.core.reader import HokutoReader, Reader
 
 
 class TestReader:
@@ -12,3 +12,9 @@ class TestReader:
         logj, ircp = reader.get_tafel_plot()
         assert len(logj) == 327
         assert len(ircp) == 327
+
+
+class TestHokutoReader:
+    def test_read_csv(self):
+        reader = HokutoReader()
+        reader.read_csv("tests/data/example2.CSV")

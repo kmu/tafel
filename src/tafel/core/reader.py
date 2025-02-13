@@ -58,3 +58,8 @@ class Reader:
         self.iR = ia * self.electrolyte_resistance
 
         return self.E_vs_RHE_V - self.iR
+
+
+class HokutoReader(Reader):
+    def read_csv(self, path: str) -> None:
+        pass
