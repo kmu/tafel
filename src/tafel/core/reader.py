@@ -30,16 +30,17 @@ class Reader:
     def get_potential_shift(self) -> float:
         return self.ph * 0.0591 + self.reference_potential
 
-    def get_log_j(self) -> pd.Series:
+    def get_log_j(self) -> np.ndarray:
         j = self.get_j()
-        return np.log10(j / 1000)
+        return np.log10(j / 1000)  # Convert to A/cm2
+
+    def get_decent_data(self) -> pd.DataFrame:
+        mask = self.df["<I>/mA"] > 0
+        return self.df.loc[mask, :].copy()
 
     def get_j(self, cycle_number: int = -1) -> pd.Series:
-        sdf = (
-            self.df[self.df["cycle number"] == cycle_number]
-            if cycle_number >= 0
-            else self.df
-        )
+        sdf = self.get_decent_data()
+        sdf = sdf[sdf["cycle number"] == cycle_number] if cycle_number >= 0 else sdf
         return sdf["<I>/mA"] / self.electrode_surface_area  # mA/cm2
 
     def get_tafel_plot(self) -> tuple:
@@ -48,11 +49,12 @@ class Reader:
 
         return logj, ircp
 
-    def get_ir_corrected_potential(self) -> pd.Series:
+    def get_ir_corrected_potential(self) -> np.ndarray:
         potential_shift = self.get_potential_shift()
-        self.E_vs_RHE_V = self.df["Ewe/V"] + potential_shift
+        sdf = self.get_decent_data()
+        self.E_vs_RHE_V = sdf["Ewe/V"] + potential_shift
 
-        ia = self.df["<I>/mA"] / 1000
+        ia = sdf["<I>/mA"] / 1000
         self.iR = ia * self.electrolyte_resistance
 
         return self.E_vs_RHE_V - self.iR

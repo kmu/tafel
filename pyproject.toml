@@ -1,6 +1,6 @@
 [project]
 name = "tafel"
-version = "2024.11.28"
+version = "2025.2.12"
 description = "A python package to extract Tafel slope"
 authors = [
     {name = "Koki Muraoka", email = "muraok_k@chemsys.t.u-tokyo.ac.jp"},
@@ -8,7 +8,7 @@ authors = [
 requires-python = ">=3.11"
 readme = "README.md"
 license = {text = "MIT"}
-dependencies = ["optuna>=4.1.0", "pandas>=2.2.3"]
+dependencies = ["optuna>=4.2.0", "pandas>=2.2.3", "plotly>=6.0.0", "scipy>=1.15.1", "scikit-learn>=1.6.1", "kaleido==0.2.1"]
 
 [project.scripts]
 tafel = "tafel.app.cli:main"
@@ -28,7 +28,7 @@ black_format = "black ."
 ruff_lint = "ruff check ."
 ruff_format = "ruff format ."
 ruff_fix = "ruff check --fix-only ."
-test = "pytest tests --cov=tafel.core --cov-report=term --cov-report=xml"
+test = "pytest tests --cov=tafel.core --cov-report=term --cov-report=xml --junitxml=junit.xml -o junit_family=legacy"
 format = { composite = ["black_format", "ruff_fix", "ruff_format"] }
 lint = { composite = ["ruff_lint", "pyright"] }
 check = { composite = ["format", "lint", "test"] }
@@ -45,7 +45,6 @@ ignore = [
   "COM812",
   "ISC001",
   "T201", # Do not use print
-  "ANN101",
   "ANN401", # Dynamically typed expressions (typing.Any) are disallowed
 ]
 

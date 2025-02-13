@@ -1,13 +1,35 @@
 import argparse
 
+from tafel.core.bo import BayesianOptimizer
 from tafel.core.reader import Reader
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", type=str, required=True)
+    parser.add_argument("-p", "--ph", type=float, default=13, help="pH of the electrolyte (default: 13)")
     parser.add_argument(
-        "-p", "--ph", type=float, default=13, help="pH of the electrolyte (default: 13)"
+        "-o",
+        "--output",
+        type=str,
+        default="tafel_plot",
+        help="Output directory name (default: tafel_plot)",
+    )
+    parser.add_argument("-t", "--trials", type=int, default=100, help="Number of trials (default: 100)")
+    parser.add_argument(
+        "--r2-threshold",
+        type=float,
+        default=0.999,
+        help="R2 threshold (default: 0.9999)",
+    )
+    parser.add_argument("-l", "--lines", type=int, default=2, help="Number of lines (default: 2)")
+
+    parser.add_argument(
+        "-pt",
+        "--points-threshold",
+        type=int,
+        default=5,
+        help="Number of points threshold (default: 10)",
     )
     parser.add_argument(
         "-r",
@@ -30,7 +52,7 @@ def main() -> None:
         "--electrolyte-resistance",
         type=float,
         default=0.05,
-        help="Electrolyte resistance in ohms (default: 0.05)",
+        help="Electrolyte resistance (default: 0.05)",
     )
 
     args = parser.parse_args()
@@ -41,6 +63,18 @@ def main() -> None:
         electrolyte_resistance=args.electrolyte_resistance,
     )
     reader.read_mpt(args.file)
+
+    opt = BayesianOptimizer(
+        trials=args.trials,
+        r2_threshold=args.r2_threshold,
+        points_threshold=args.points_threshold,
+        lines=args.lines,
+        output_dir=args.output,
+        forbidden_idxs=[],
+    )
+    x, y = reader.get_tafel_plot()
+
+    opt.fit(x=x, y=y)
 
 
 if __name__ == "__main__":
