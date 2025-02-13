@@ -8,11 +8,8 @@ jobs:
   update-pdm:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@v3
+      - uses: actions/checkout@v4
+      - uses: pdm-project/setup-pdm@v4
         with:
           python-version: "3.11"
 
