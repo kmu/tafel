@@ -1,18 +1,30 @@
-name: Update PDM dependencies
+name: Sync PDM Dependencies
 on:
   pull_request:
     branches:
-      - dependabot/**
+      - dependabot/**  # Run only on Dependabot PRs
+
 jobs:
   update-pdm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: pdm-project/setup-pdm@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v3
         with:
           python-version: "3.11"
-      - run: pdm update
-      - run: pdm lock
-      - run: git add pyproject.toml pdm.lock
-      - run: git commit -m "Update dependencies with PDM"
-      - run: git push origin HEAD
+
+      - name: Sync dependencies
+        run: |
+          pdm update  # Update dependencies
+          pdm lock  # Re-lock dependencies
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add pyproject.toml pdm.lock
+          git commit -m "Sync pyproject.toml and pdm.lock" || echo "No changes to commit"
+          git push origin HEAD
