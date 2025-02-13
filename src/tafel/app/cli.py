@@ -20,7 +20,7 @@ def main() -> None:
         "--r2-threshold",
         type=float,
         default=0.999,
-        help="R2 threshold (default: 0.9999)",
+        help="R2 threshold (default: 0.999)",
     )
     parser.add_argument("-l", "--lines", type=int, default=2, help="Number of lines (default: 2)")
 
