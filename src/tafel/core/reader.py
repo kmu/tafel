@@ -1,3 +1,5 @@
+import re
+from io import StringIO
 from pathlib import Path
 
 import numpy as np
@@ -19,13 +21,25 @@ class Reader:
         with Path(path).open() as f:
             contents = f.read()
 
-        header_line = contents.split("Nb header lines : ")[1].split("\n")[0]
+        lines = contents.splitlines()
+        metadata = {}
+
+        for _, line in enumerate(lines):
+            if line.startswith("mode"):
+                break
+            if ":" in line:
+                key, value = line.split(":", 1)
+                metadata[key.strip()] = value.strip()
+
+        self.docs = metadata
+
+        header_line = metadata.get("Nb header lines", "0")
         header_lines = int(header_line)
 
         self.df = pd.read_csv(path, skiprows=header_lines - 1, sep="\t")
 
-        contents = contents.split("Electrode surface area : ")[1].split(" cm2")[0]
-        self.electrode_surface_area = float(contents)
+        electrode_surface_area = metadata.get("Electrode surface area", "0 cm2").split(" cm2")[0]
+        self.electrode_surface_area = float(electrode_surface_area)
 
     def get_potential_shift(self) -> float:
         return self.ph * 0.0591 + self.reference_potential
@@ -62,4 +76,46 @@ class Reader:
 
 class HokutoReader(Reader):
     def read_csv(self, path: str) -> None:
-        pass
+        with Path(path).open(encoding="shift-jis") as f:
+            contents = f.read()
+
+        # Splitting the sections
+        sections = re.split(r"《(.*?)》\n", contents)[1:]
+
+        # Parsing into a dictionary
+        parsed_data = {}
+
+        for i in range(0, len(sections), 2):
+            section_name = sections[i].strip()
+            section_content = sections[i + 1].strip().split("\n")
+
+            if "測定データ" in section_name:
+                # Handling measurement data separately
+                data = pd.read_csv(StringIO("\n".join(section_content)), sep=",", header=None)
+                data.columns = data.iloc[0]
+                data = data.iloc[1:]
+                parsed_data[section_name] = data
+            else:
+                # General key-value extraction
+                section_dict = {}
+                for line in section_content:
+                    parts = [x.strip() for x in line.split(",") if x.strip()]
+                    if len(parts) == 2:  # noqa: PLR2004
+                        section_dict[parts[0]] = parts[1]
+                    elif len(parts) > 2:  # noqa: PLR2004
+                        section_dict[parts[0]] = parts[1:]  # Store as list if multiple values
+                parsed_data[section_name] = section_dict
+
+        self.docs = parsed_data
+
+        self.df = parsed_data["測定データ"]
+        self.df = self.df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
+        self.df["<I>/mA"] = self.df["<I>/mA"].astype(float)
+        self.df["Ewe/V"] = self.df["Ewe/V"].astype(float)
+
+        area_info = self.docs["測定情報"]["面積"]
+        if area_info[1] == "cm2":
+            self.electrode_surface_area = float(area_info[0])
+        else:
+            msg = f"Unknown area unit: {area_info[1]}"
+            raise ValueError(msg)
