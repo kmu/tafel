@@ -1,4 +1,4 @@
-from tafel.core.reader import Reader
+from tafel.core.reader import HokutoReader, Reader
 
 
 class TestReader:
@@ -12,3 +12,14 @@ class TestReader:
         logj, ircp = reader.get_tafel_plot()
         assert len(logj) == 327
         assert len(ircp) == 327
+
+        print(reader.docs)
+        assert reader.docs["Characteristic mass"] == "0.001 g"
+
+    def test_read_hokuto(self):
+        reader = HokutoReader()
+        reader.read_csv("tests/data/example2.CSV")
+        assert reader.electrode_surface_area == 1.0
+        logj, ircp = reader.get_tafel_plot()
+        assert len(logj) == 1139
+        assert len(ircp) == 1139
