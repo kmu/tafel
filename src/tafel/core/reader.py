@@ -1,6 +1,7 @@
 import re
 from io import StringIO
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -75,12 +76,12 @@ class Reader:
 
 
 class HokutoReader(Reader):
-    def read_csv(self, path: str) -> None:
-        with Path(path).open(encoding="shift-jis") as f:
-            contents = f.read()
+    def get_number_of_measurements(self) -> int:
+        return len(self.docs["measurements"])
 
-        # Splitting the sections
-        sections = re.split(r"《(.*?)》\n", contents)[1:]
+    @staticmethod
+    def txt_to_dict(txt: str) -> dict[str, Any]:
+        sections = re.split(r"《(.*?)》\n", txt)[1:]
 
         # Parsing into a dictionary
         parsed_data = {}
@@ -106,14 +107,33 @@ class HokutoReader(Reader):
                         section_dict[parts[0]] = parts[1:]  # Store as list if multiple values
                 parsed_data[section_name] = section_dict
 
-        self.docs = parsed_data
+        return parsed_data
 
-        self.df = parsed_data["測定データ"]
+    def read_csv(self, path: str) -> None:
+        measurements = []
+        self.docs = {}
+
+        with Path(path).open(encoding="shift-jis") as f:
+            contents = f.read()
+
+        chapters = contents.split("《測定フェイズヘッダ》")
+
+        for i, chapter in enumerate(chapters):
+            if i == 0:
+                self.docs["metadata"] = self.txt_to_dict(chapter)
+            else:
+                _docs = self.txt_to_dict("《測定フェイズヘッダ》" + chapter)
+                measurements.append(_docs)
+
+        self.docs["measurements"] = measurements
+        # Splitting the sections
+
+        self.df = self.docs["measurements"][-1]["測定データ"]
         self.df = self.df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
         self.df["<I>/mA"] = self.df["<I>/mA"].astype(float)
         self.df["Ewe/V"] = self.df["Ewe/V"].astype(float)
 
-        area_info = self.docs["測定情報"]["面積"]
+        area_info = self.docs["metadata"]["測定情報"]["面積"]
         if area_info[1] == "cm2":
             self.electrode_surface_area = float(area_info[0])
         else:

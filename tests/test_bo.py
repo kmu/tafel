@@ -16,12 +16,20 @@ class TestBO(TestCase):
         bo.fit(x, y)
 
     def tearDown(self):
-        shutil.rmtree("test_output")
+        if Path("test_output").exists():
+            shutil.rmtree("test_output")
 
     def test_bo_with_hokuto(self):
         reader = HokutoReader()
         reader.read_csv("tests/data/example2.CSV")
+
         x = reader.get_log_j()
         y = reader.get_ir_corrected_potential()
         bo = BayesianOptimizer(10, 0.5, 2, 1, [], Path("test_output"))
         bo.fit(x, y)
+
+    def test_measurements(self):
+        reader = HokutoReader()
+        reader.read_csv("tests/data/example2.CSV")
+
+        assert reader.get_number_of_measurements() == 3
