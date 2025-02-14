@@ -74,6 +74,9 @@ class Reader:
 
         return (e_vs_rhe_v - ir).to_numpy()
 
+    def get_tafel_plots(self) -> list[tuple[np.ndarray, np.ndarray]]:
+        return [self.get_tafel_plot()]
+
 
 class HokutoReader(Reader):
     def get_number_of_measurements(self) -> int:
