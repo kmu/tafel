@@ -18,14 +18,14 @@ class TestBO(TestCase):
             trials=10,
             r2_threshold=0.5,
             points_threshold=30,
-            lines=1,
+            lines=2,
             forbidden_idxs=[],
             output_dir=Path("test_output"),
         )
         studies, fit_results = bo.fit(x, y)
 
-        assert len(studies) == 1
-        assert len(fit_results) == 1
+        assert len(studies) == 2
+        assert len(fit_results) == 2
 
     def tearDown(self):
         if Path("test_output").exists():
