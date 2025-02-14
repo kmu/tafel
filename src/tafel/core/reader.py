@@ -74,8 +74,9 @@ class Reader:
 
         return (e_vs_rhe_v - ir).to_numpy()
 
-    def get_tafel_plots(self) -> list[tuple[np.ndarray, np.ndarray]]:
-        return [self.get_tafel_plot()]
+    def get_tafel_plots(self) -> list[tuple[np.ndarray, np.ndarray, str]]:
+        plt = self.get_tafel_plot()
+        return [(plt[0], plt[1], "")]
 
 
 class HokutoReader(Reader):
@@ -112,10 +113,10 @@ class HokutoReader(Reader):
 
         return parsed_data
 
-    def get_tafel_plots(self) -> list[tuple[np.ndarray, np.ndarray]]:
+    def get_tafel_plots(self) -> list[tuple[np.ndarray, np.ndarray, str]]:
         measurements = []
-        for measurement in self.docs["measurements"]:
-            for kind in ["アノード", "カソード"]:
+        for kind in ["アノード", "カソード"]:
+            for measurement in self.docs["measurements"]:
                 _df = measurement["測定データ"]
                 _df = _df.query(f"種別 == '{kind}'")
                 _df = _df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
@@ -125,7 +126,13 @@ class HokutoReader(Reader):
                 logj = self.i_to_logj(_df)
                 ircp = self.apply_ir_correction(_df)
 
-                measurements.append((logj, ircp))
+                metadata = measurement.copy()
+
+                del metadata["測定データ"]
+                metadata["kind"] = kind
+                name = f"{kind}-{metadata['測定フェイズヘッダ']['サイクル番号']}"
+
+                measurements.append((logj, ircp, name))
 
         return measurements
 
