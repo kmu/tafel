@@ -1,5 +1,6 @@
 
 [![Python application](https://github.com/kmu/tafel/actions/workflows/test.yaml/badge.svg)](https://github.com/kmu/tafel/actions/workflows/test.yaml)
+[![codecov](https://codecov.io/gh/kmu/tafel/graph/badge.svg?token=E48EGKC5FQ)](https://codecov.io/gh/kmu/tafel)
 
 # Tafel
 
