@@ -65,14 +65,16 @@ class Reader:
         return logj, ircp
 
     def get_ir_corrected_potential(self) -> np.ndarray:
-        potential_shift = self.get_potential_shift()
         sdf = self.get_decent_data()
-        self.E_vs_RHE_V = sdf["Ewe/V"] + potential_shift
+        return self.apply_ir_correction(sdf)
 
-        ia = sdf["<I>/mA"] / 1000
-        self.iR = ia * self.electrolyte_resistance
+    def apply_ir_correction(self, df: pd.DataFrame) -> np.ndarray:
+        potential_shift = self.get_potential_shift()
+        e_vs_rhe_v = df["Ewe/V"] + potential_shift
+        ia = df["<I>/mA"] / 1000
+        ir = ia * self.electrolyte_resistance
 
-        return self.E_vs_RHE_V - self.iR
+        return (e_vs_rhe_v - ir).to_numpy()
 
 
 class HokutoReader(Reader):
@@ -109,13 +111,14 @@ class HokutoReader(Reader):
 
         return parsed_data
 
-    def get_tafel_plots(self):
+    def get_tafel_plots(self) -> None:
         for measurement in self.docs["measurements"]:
-            self.df = measurement["測定データ"]
-            self.df = self.df.query("種別 == 'アノード'")
-            self.df = self.df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
-            self.df["<I>/mA"] = self.df["<I>/mA"].astype(float)
-            self.df["Ewe/V"] = self.df["Ewe/V"].astype(float)
+            for kind in ["アノード", "カソード"]:
+                _df = measurement["測定データ"]
+                _df = _df.query(f"種別 == '{kind}'")
+                _df = _df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
+                _df["<I>/mA"] = _df["<I>/mA"].astype(float)
+                _df["Ewe/V"] = _df["Ewe/V"].astype(float)
 
     def read_csv(self, path: str) -> None:
         measurements = []
@@ -137,8 +140,7 @@ class HokutoReader(Reader):
         # Splitting the sections
 
         self.df = self.docs["measurements"][-1]["測定データ"]
-        # self.df = self.df.query("種別 == 'アノード'")
-        self.df = self.df.query("種別 == 'カソード'")
+
         self.df = self.df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
         self.df["<I>/mA"] = self.df["<I>/mA"].astype(float)
         self.df["Ewe/V"] = self.df["Ewe/V"].astype(float)

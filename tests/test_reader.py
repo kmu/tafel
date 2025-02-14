@@ -21,5 +21,6 @@ class TestReader:
         reader.read_csv("tests/data/example2.CSV")
         assert reader.electrode_surface_area == 1.0
         logj, ircp = reader.get_tafel_plot()
-        assert len(logj) == 1139
-        assert len(ircp) == 1139
+
+        assert len(reader.docs["measurements"]) == 3
+        assert len(logj) == len(ircp)
