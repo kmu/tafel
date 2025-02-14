@@ -46,17 +46,15 @@ class Reader:
         return self.ph * 0.0591 + self.reference_potential
 
     def get_log_j(self) -> np.ndarray:
-        j = self.get_j()
-        return np.log10(j / 1000)  # Convert to A/cm2
+        sdf = self.get_decent_data()
+        return self.i_to_logj(sdf)
 
     def get_decent_data(self) -> pd.DataFrame:
         mask = self.df["<I>/mA"] > 0
         return self.df.loc[mask, :].copy()
 
-    def get_j(self, cycle_number: int = -1) -> pd.Series:
-        sdf = self.get_decent_data()
-        sdf = sdf[sdf["cycle number"] == cycle_number] if cycle_number >= 0 else sdf
-        return sdf["<I>/mA"] / self.electrode_surface_area  # mA/cm2
+    def i_to_logj(self, df: pd.DataFrame) -> np.ndarray:
+        return np.log10(df["<I>/mA"] / 1000 / self.electrode_surface_area)
 
     def get_tafel_plot(self) -> tuple:
         logj = self.get_log_j()
