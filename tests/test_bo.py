@@ -16,8 +16,8 @@ class TestBO(TestCase):
         bo.fit(x, y)
         bo = BayesianOptimizer(
             trials=10,
-            r2_threshold=0.01,
-            points_threshold=3,
+            r2_threshold=0.5,
+            points_threshold=2,
             lines=2,
             forbidden_idxs=[],
             output_dir=Path("test_output"),
@@ -55,3 +55,17 @@ class TestBO(TestCase):
         reader.read_csv("tests/data/example2.CSV")
 
         assert reader.get_number_of_measurements() == 3
+
+        for x, y, name in reader.get_tafel_plots():
+            print(name)
+            print(x)
+            print(y)
+            bo = BayesianOptimizer(
+                trials=10,
+                r2_threshold=0.01,
+                points_threshold=3,
+                lines=2,
+                forbidden_idxs=[],
+                output_dir=Path("test_output") / name,
+            )
+            bo.fit(x, y)

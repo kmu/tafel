@@ -46,12 +46,12 @@ class Reader:
         return self.ph * 0.0591 + self.reference_potential
 
     def get_log_j(self) -> np.ndarray:
-        sdf = self.get_decent_data()
+        sdf = self.get_decent_data(self.df)
         return self.i_to_logj(sdf)
 
-    def get_decent_data(self) -> pd.DataFrame:
-        mask = self.df["<I>/mA"] > 0
-        return self.df.loc[mask, :].copy()
+    def get_decent_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        mask = df["<I>/mA"] > 0
+        return df.loc[mask, :].copy()
 
     def i_to_logj(self, df: pd.DataFrame) -> np.ndarray:
         return np.log10(df["<I>/mA"] / 1000 / self.electrode_surface_area)
@@ -63,7 +63,7 @@ class Reader:
         return logj, ircp
 
     def get_ir_corrected_potential(self) -> np.ndarray:
-        sdf = self.get_decent_data()
+        sdf = self.get_decent_data(self.df)
         return self.apply_ir_correction(sdf)
 
     def apply_ir_correction(self, df: pd.DataFrame) -> np.ndarray:
@@ -120,8 +120,11 @@ class HokutoReader(Reader):
                 _df = measurement["測定データ"]
                 _df = _df.query(f"種別 == '{kind}'")
                 _df = _df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
+
                 _df["<I>/mA"] = _df["<I>/mA"].astype(float)
                 _df["Ewe/V"] = _df["Ewe/V"].astype(float)
+
+                _df = self.get_decent_data(_df)
 
                 logj = self.i_to_logj(_df)
                 ircp = self.apply_ir_correction(_df)
