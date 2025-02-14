@@ -109,6 +109,14 @@ class HokutoReader(Reader):
 
         return parsed_data
 
+    def get_tafel_plots(self):
+        for measurement in self.docs["measurements"]:
+            self.df = measurement["測定データ"]
+            self.df = self.df.query("種別 == 'アノード'")
+            self.df = self.df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
+            self.df["<I>/mA"] = self.df["<I>/mA"].astype(float)
+            self.df["Ewe/V"] = self.df["Ewe/V"].astype(float)
+
     def read_csv(self, path: str) -> None:
         measurements = []
         self.docs = {}
@@ -129,6 +137,8 @@ class HokutoReader(Reader):
         # Splitting the sections
 
         self.df = self.docs["measurements"][-1]["測定データ"]
+        # self.df = self.df.query("種別 == 'アノード'")
+        self.df = self.df.query("種別 == 'カソード'")
         self.df = self.df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
         self.df["<I>/mA"] = self.df["<I>/mA"].astype(float)
         self.df["Ewe/V"] = self.df["Ewe/V"].astype(float)
