@@ -109,7 +109,8 @@ class HokutoReader(Reader):
 
         return parsed_data
 
-    def get_tafel_plots(self) -> None:
+    def get_tafel_plots(self) -> list[tuple[np.ndarray, np.ndarray]]:
+        measurements = []
         for measurement in self.docs["measurements"]:
             for kind in ["アノード", "カソード"]:
                 _df = measurement["測定データ"]
@@ -117,6 +118,13 @@ class HokutoReader(Reader):
                 _df = _df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
                 _df["<I>/mA"] = _df["<I>/mA"].astype(float)
                 _df["Ewe/V"] = _df["Ewe/V"].astype(float)
+
+                logj = self.i_to_logj(_df)
+                ircp = self.apply_ir_correction(_df)
+
+                measurements.append((logj, ircp))
+
+        return measurements
 
     def read_csv(self, path: str) -> None:
         measurements = []

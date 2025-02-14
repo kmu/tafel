@@ -31,3 +31,5 @@ class TestReader:
 
         assert len(reader.docs["measurements"]) == 3
         assert len(logj) == len(ircp)
+
+        assert len(reader.get_tafel_plots()) == 6
