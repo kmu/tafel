@@ -64,6 +64,9 @@ class Reader:
 
         return logj, ircp
 
+    def get_tafel_plots(self):
+
+
     def get_ir_corrected_potential(self) -> np.ndarray:
         potential_shift = self.get_potential_shift()
         sdf = self.get_decent_data()
@@ -138,7 +141,7 @@ class HokutoReader(Reader):
 
         self.df = self.docs["measurements"][-1]["測定データ"]
         # self.df = self.df.query("種別 == 'アノード'")
-        self.df = self.df.query("種別 == 'カソード'")
+        # self.df = self.df.query("種別 == 'カソード'")
         self.df = self.df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
         self.df["<I>/mA"] = self.df["<I>/mA"].astype(float)
         self.df["Ewe/V"] = self.df["Ewe/V"].astype(float)
