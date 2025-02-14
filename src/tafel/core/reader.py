@@ -1,6 +1,7 @@
 import re
 from io import StringIO
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -45,17 +46,15 @@ class Reader:
         return self.ph * 0.0591 + self.reference_potential
 
     def get_log_j(self) -> np.ndarray:
-        j = self.get_j()
-        return np.log10(j / 1000)  # Convert to A/cm2
+        sdf = self.get_decent_data()
+        return self.i_to_logj(sdf)
 
     def get_decent_data(self) -> pd.DataFrame:
         mask = self.df["<I>/mA"] > 0
         return self.df.loc[mask, :].copy()
 
-    def get_j(self, cycle_number: int = -1) -> pd.Series:
-        sdf = self.get_decent_data()
-        sdf = sdf[sdf["cycle number"] == cycle_number] if cycle_number >= 0 else sdf
-        return sdf["<I>/mA"] / self.electrode_surface_area  # mA/cm2
+    def i_to_logj(self, df: pd.DataFrame) -> np.ndarray:
+        return np.log10(df["<I>/mA"] / 1000 / self.electrode_surface_area)
 
     def get_tafel_plot(self) -> tuple:
         logj = self.get_log_j()
@@ -64,23 +63,25 @@ class Reader:
         return logj, ircp
 
     def get_ir_corrected_potential(self) -> np.ndarray:
-        potential_shift = self.get_potential_shift()
         sdf = self.get_decent_data()
-        self.E_vs_RHE_V = sdf["Ewe/V"] + potential_shift
+        return self.apply_ir_correction(sdf)
 
-        ia = sdf["<I>/mA"] / 1000
-        self.iR = ia * self.electrolyte_resistance
+    def apply_ir_correction(self, df: pd.DataFrame) -> np.ndarray:
+        potential_shift = self.get_potential_shift()
+        e_vs_rhe_v = df["Ewe/V"] + potential_shift
+        ia = df["<I>/mA"] / 1000
+        ir = ia * self.electrolyte_resistance
 
-        return self.E_vs_RHE_V - self.iR
+        return (e_vs_rhe_v - ir).to_numpy()
 
 
 class HokutoReader(Reader):
-    def read_csv(self, path: str) -> None:
-        with Path(path).open(encoding="shift-jis") as f:
-            contents = f.read()
+    def get_number_of_measurements(self) -> int:
+        return len(self.docs["measurements"])
 
-        # Splitting the sections
-        sections = re.split(r"《(.*?)》\n", contents)[1:]
+    @staticmethod
+    def txt_to_dict(txt: str) -> dict[str, Any]:
+        sections = re.split(r"《(.*?)》\n", txt)[1:]
 
         # Parsing into a dictionary
         parsed_data = {}
@@ -106,14 +107,51 @@ class HokutoReader(Reader):
                         section_dict[parts[0]] = parts[1:]  # Store as list if multiple values
                 parsed_data[section_name] = section_dict
 
-        self.docs = parsed_data
+        return parsed_data
 
-        self.df = parsed_data["測定データ"]
+    def get_tafel_plots(self) -> list[tuple[np.ndarray, np.ndarray]]:
+        measurements = []
+        for measurement in self.docs["measurements"]:
+            for kind in ["アノード", "カソード"]:
+                _df = measurement["測定データ"]
+                _df = _df.query(f"種別 == '{kind}'")
+                _df = _df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
+                _df["<I>/mA"] = _df["<I>/mA"].astype(float)
+                _df["Ewe/V"] = _df["Ewe/V"].astype(float)
+
+                logj = self.i_to_logj(_df)
+                ircp = self.apply_ir_correction(_df)
+
+                measurements.append((logj, ircp))
+
+        return measurements
+
+    def read_csv(self, path: str) -> None:
+        measurements = []
+        self.docs = {}
+
+        with Path(path).open(encoding="shift-jis") as f:
+            contents = f.read()
+
+        chapters = contents.split("《測定フェイズヘッダ》")
+
+        for i, chapter in enumerate(chapters):
+            if i == 0:
+                self.docs["metadata"] = self.txt_to_dict(chapter)
+            else:
+                _docs = self.txt_to_dict("《測定フェイズヘッダ》" + chapter)
+                measurements.append(_docs)
+
+        self.docs["measurements"] = measurements
+        # Splitting the sections
+
+        self.df = self.docs["measurements"][-1]["測定データ"]
+
         self.df = self.df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
         self.df["<I>/mA"] = self.df["<I>/mA"].astype(float)
         self.df["Ewe/V"] = self.df["Ewe/V"].astype(float)
 
-        area_info = self.docs["測定情報"]["面積"]
+        area_info = self.docs["metadata"]["測定情報"]["面積"]
         if area_info[1] == "cm2":
             self.electrode_surface_area = float(area_info[0])
         else:

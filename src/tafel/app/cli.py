@@ -1,7 +1,7 @@
 import argparse
 
 from tafel.core.bo import BayesianOptimizer
-from tafel.core.reader import Reader
+from tafel.core.reader import HokutoReader, Reader
 
 
 def main() -> None:
@@ -57,12 +57,22 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    reader = Reader(
-        ph=args.ph,
-        reference_potential=args.reference_potential,
-        electrolyte_resistance=args.electrolyte_resistance,
-    )
-    reader.read_mpt(args.file)
+    if ".mpt" in args.file:
+        reader = Reader(
+            ph=args.ph,
+            reference_potential=args.reference_potential,
+            electrolyte_resistance=args.electrolyte_resistance,
+        )
+        reader.read_mpt(args.file)
+    elif ".CSV" in args.file:
+        reader = HokutoReader(
+            ph=args.ph,
+            reference_potential=args.reference_potential,
+            electrolyte_resistance=args.electrolyte_resistance,
+        )
+        reader.read_csv(args.file)
+    else:
+        raise NotImplementedError
 
     opt = BayesianOptimizer(
         trials=args.trials,
