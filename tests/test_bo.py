@@ -16,8 +16,8 @@ class TestBO(TestCase):
         bo.fit(x, y)
         bo = BayesianOptimizer(
             trials=10,
-            r2_threshold=0.5,
-            points_threshold=30,
+            r2_threshold=0.01,
+            points_threshold=3,
             lines=2,
             forbidden_idxs=[],
             output_dir=Path("test_output"),
