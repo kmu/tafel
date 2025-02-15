@@ -46,12 +46,12 @@ class Reader:
         return self.ph * 0.0591 + self.reference_potential
 
     def get_log_j(self) -> np.ndarray:
-        sdf = self.get_decent_data()
+        sdf = self.get_decent_data(self.df)
         return self.i_to_logj(sdf)
 
-    def get_decent_data(self) -> pd.DataFrame:
-        mask = self.df["<I>/mA"] > 0
-        return self.df.loc[mask, :].copy()
+    def get_decent_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        mask = df["<I>/mA"] > 0
+        return df.loc[mask, :].copy()
 
     def i_to_logj(self, df: pd.DataFrame) -> np.ndarray:
         return np.log10(df["<I>/mA"] / 1000 / self.electrode_surface_area)
@@ -63,7 +63,7 @@ class Reader:
         return logj, ircp
 
     def get_ir_corrected_potential(self) -> np.ndarray:
-        sdf = self.get_decent_data()
+        sdf = self.get_decent_data(self.df)
         return self.apply_ir_correction(sdf)
 
     def apply_ir_correction(self, df: pd.DataFrame) -> np.ndarray:
@@ -73,6 +73,10 @@ class Reader:
         ir = ia * self.electrolyte_resistance
 
         return (e_vs_rhe_v - ir).to_numpy()
+
+    def get_tafel_plots(self) -> list[tuple[np.ndarray, np.ndarray, str]]:
+        plt = self.get_tafel_plot()
+        return [(plt[0], plt[1], "")]
 
 
 class HokutoReader(Reader):
@@ -109,20 +113,29 @@ class HokutoReader(Reader):
 
         return parsed_data
 
-    def get_tafel_plots(self) -> list[tuple[np.ndarray, np.ndarray]]:
+    def get_tafel_plots(self) -> list[tuple[np.ndarray, np.ndarray, str]]:
         measurements = []
-        for measurement in self.docs["measurements"]:
-            for kind in ["アノード", "カソード"]:
+        for kind in ["アノード", "カソード"]:
+            for measurement in self.docs["measurements"]:
                 _df = measurement["測定データ"]
                 _df = _df.query(f"種別 == '{kind}'")
                 _df = _df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
+
                 _df["<I>/mA"] = _df["<I>/mA"].astype(float)
                 _df["Ewe/V"] = _df["Ewe/V"].astype(float)
+
+                _df = self.get_decent_data(_df)
 
                 logj = self.i_to_logj(_df)
                 ircp = self.apply_ir_correction(_df)
 
-                measurements.append((logj, ircp))
+                metadata = measurement.copy()
+
+                del metadata["測定データ"]
+                metadata["kind"] = kind
+                name = f"{kind}-{metadata['測定フェイズヘッダ']['サイクル番号']}"
+
+                measurements.append((logj, ircp, name))
 
         return measurements
 

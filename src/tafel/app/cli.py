@@ -74,17 +74,16 @@ def main() -> None:
     else:
         raise NotImplementedError
 
-    opt = BayesianOptimizer(
-        trials=args.trials,
-        r2_threshold=args.r2_threshold,
-        points_threshold=args.points_threshold,
-        lines=args.lines,
-        output_dir=args.output,
-        forbidden_idxs=[],
-    )
-    x, y = reader.get_tafel_plot()
-
-    opt.fit(x=x, y=y)
+    for x, y, name in reader.get_tafel_plots():
+        opt = BayesianOptimizer(
+            trials=args.trials,
+            r2_threshold=args.r2_threshold,
+            points_threshold=args.points_threshold,
+            lines=args.lines,
+            output_dir=args.output + f"/{name}",
+            forbidden_idxs=[],
+        )
+        opt.fit(x=x, y=y)
 
 
 if __name__ == "__main__":

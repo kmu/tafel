@@ -17,15 +17,15 @@ class TestBO(TestCase):
         bo = BayesianOptimizer(
             trials=10,
             r2_threshold=0.5,
-            points_threshold=30,
-            lines=1,
+            points_threshold=2,
+            lines=2,
             forbidden_idxs=[],
             output_dir=Path("test_output"),
         )
         studies, fit_results = bo.fit(x, y)
 
-        assert len(studies) == 1
-        assert len(fit_results) == 1
+        assert len(studies) == 2
+        assert len(fit_results) == 2
 
     def tearDown(self):
         if Path("test_output").exists():
@@ -55,3 +55,17 @@ class TestBO(TestCase):
         reader.read_csv("tests/data/example2.CSV")
 
         assert reader.get_number_of_measurements() == 3
+
+        for x, y, name in reader.get_tafel_plots():
+            print(name)
+            print(x)
+            print(y)
+            bo = BayesianOptimizer(
+                trials=10,
+                r2_threshold=0.01,
+                points_threshold=3,
+                lines=2,
+                forbidden_idxs=[],
+                output_dir=Path("test_output") / name,
+            )
+            bo.fit(x, y)
