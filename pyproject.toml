@@ -11,7 +11,7 @@ license = {text = "MIT"}
 dependencies = [
     "optuna==4.2.1",
     "pandas==2.2.3",
-    "plotly==6.0.0",
+    "plotly==6.0.1",
     "scipy==1.15.1",
     "scikit-learn==1.6.1",
     "kaleido==0.2.1"
