@@ -8,6 +8,11 @@ A command-line tool for extracting Tafel slopes from MPT files.
 
 This tool is currently in an experimental stage.
 
+## Supported files
+
+- mpt files: assumes LSV experiments conducted using BioLogic EC-Lab.
+- csv files: assumes
+
 ## Installation
 
 Requirements: Python 3.11 or above
