@@ -82,9 +82,8 @@ def main() -> None:
         output_dir=args.output,
         forbidden_idxs=[],
     )
-    x, y = reader.get_tafel_plot()
-
-    opt.fit(x=x, y=y)
+    for x, y in reader.get_tafel_plots():
+        opt.fit(x=x, y=y)
 
 
 if __name__ == "__main__":

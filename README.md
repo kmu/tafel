@@ -1,4 +1,8 @@
+
+[![Python application](https://github.com/kmu/tafel/actions/workflows/test.yaml/badge.svg)](https://github.com/kmu/tafel/actions/workflows/test.yaml)
+
 # Tafel
+
 
 A command-line tool for extracting Tafel slopes from MPT files.
 

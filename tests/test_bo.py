@@ -14,6 +14,18 @@ class TestBO(TestCase):
         y = reader.get_ir_corrected_potential()
         bo = BayesianOptimizer(10, 0.5, 2, 1, [], Path("test_output"))
         bo.fit(x, y)
+        bo = BayesianOptimizer(
+            trials=10,
+            r2_threshold=0.5,
+            points_threshold=30,
+            lines=2,
+            forbidden_idxs=[],
+            output_dir=Path("test_output"),
+        )
+        studies, fit_results = bo.fit(x, y)
+
+        assert len(studies) == 2
+        assert len(fit_results) == 2
 
     def tearDown(self):
         if Path("test_output").exists():
@@ -25,8 +37,18 @@ class TestBO(TestCase):
 
         x = reader.get_log_j()
         y = reader.get_ir_corrected_potential()
-        bo = BayesianOptimizer(10, 0.5, 2, 1, [], Path("test_output"))
-        bo.fit(x, y)
+        bo = BayesianOptimizer(
+            trials=10,
+            r2_threshold=0.5,
+            points_threshold=30,
+            lines=1,
+            forbidden_idxs=[],
+            output_dir=Path("test_output"),
+        )
+        studies, fit_results = bo.fit(x, y)
+
+        assert len(studies) == 1
+        assert len(fit_results) == 1
 
     def test_measurements(self):
         reader = HokutoReader()

@@ -46,17 +46,15 @@ class Reader:
         return self.ph * 0.0591 + self.reference_potential
 
     def get_log_j(self) -> np.ndarray:
-        j = self.get_j()
-        return np.log10(j / 1000)  # Convert to A/cm2
+        sdf = self.get_decent_data()
+        return self.i_to_logj(sdf)
 
     def get_decent_data(self) -> pd.DataFrame:
         mask = self.df["<I>/mA"] > 0
         return self.df.loc[mask, :].copy()
 
-    def get_j(self, cycle_number: int = -1) -> pd.Series:
-        sdf = self.get_decent_data()
-        sdf = sdf[sdf["cycle number"] == cycle_number] if cycle_number >= 0 else sdf
-        return sdf["<I>/mA"] / self.electrode_surface_area  # mA/cm2
+    def i_to_logj(self, df: pd.DataFrame) -> np.ndarray:
+        return np.log10(df["<I>/mA"] / 1000 / self.electrode_surface_area)
 
     def get_tafel_plot(self) -> tuple:
         logj = self.get_log_j()
@@ -68,14 +66,19 @@ class Reader:
 
 
     def get_ir_corrected_potential(self) -> np.ndarray:
-        potential_shift = self.get_potential_shift()
         sdf = self.get_decent_data()
-        self.E_vs_RHE_V = sdf["Ewe/V"] + potential_shift
+        return self.apply_ir_correction(sdf)
 
-        ia = sdf["<I>/mA"] / 1000
-        self.iR = ia * self.electrolyte_resistance
+    def apply_ir_correction(self, df: pd.DataFrame) -> np.ndarray:
+        potential_shift = self.get_potential_shift()
+        e_vs_rhe_v = df["Ewe/V"] + potential_shift
+        ia = df["<I>/mA"] / 1000
+        ir = ia * self.electrolyte_resistance
 
-        return self.E_vs_RHE_V - self.iR
+        return (e_vs_rhe_v - ir).to_numpy()
+
+    def get_tafel_plots(self) -> list[tuple[np.ndarray, np.ndarray]]:
+        return [self.get_tafel_plot()]
 
 
 class HokutoReader(Reader):
@@ -112,13 +115,22 @@ class HokutoReader(Reader):
 
         return parsed_data
 
-    def get_tafel_plots(self):
+    def get_tafel_plots(self) -> list[tuple[np.ndarray, np.ndarray]]:
+        measurements = []
         for measurement in self.docs["measurements"]:
-            self.df = measurement["測定データ"]
-            self.df = self.df.query("種別 == 'アノード'")
-            self.df = self.df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
-            self.df["<I>/mA"] = self.df["<I>/mA"].astype(float)
-            self.df["Ewe/V"] = self.df["Ewe/V"].astype(float)
+            for kind in ["アノード", "カソード"]:
+                _df = measurement["測定データ"]
+                _df = _df.query(f"種別 == '{kind}'")
+                _df = _df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
+                _df["<I>/mA"] = _df["<I>/mA"].astype(float)
+                _df["Ewe/V"] = _df["Ewe/V"].astype(float)
+
+                logj = self.i_to_logj(_df)
+                ircp = self.apply_ir_correction(_df)
+
+                measurements.append((logj, ircp))
+
+        return measurements
 
     def read_csv(self, path: str) -> None:
         measurements = []
@@ -140,8 +152,12 @@ class HokutoReader(Reader):
         # Splitting the sections
 
         self.df = self.docs["measurements"][-1]["測定データ"]
+<<<<<<< HEAD
         # self.df = self.df.query("種別 == 'アノード'")
         # self.df = self.df.query("種別 == 'カソード'")
+=======
+
+>>>>>>> refs/remotes/origin/opt
         self.df = self.df.rename(columns={"3 電流I": "<I>/mA", "4 WE/CE": "Ewe/V"})
         self.df["<I>/mA"] = self.df["<I>/mA"].astype(float)
         self.df["Ewe/V"] = self.df["Ewe/V"].astype(float)
