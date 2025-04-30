@@ -7,6 +7,14 @@ import numpy as np
 import pandas as pd
 
 
+class SimpleXYReader:
+    def read_csv(self, path: str) -> None:
+        self.df = pd.read_csv(path)
+
+    def get_tafel_plots(self):
+        return [(self.df["x"], self.df["y"], "")]
+
+
 class Reader:
     def __init__(
         self,

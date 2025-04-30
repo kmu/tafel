@@ -80,6 +80,7 @@ def perform_bayesian_optimization(
     for _i in range(lines):
         study = optuna.create_study(
             directions=["maximize", "maximize"],
+            sampler=optuna.samplers.NSGAIISampler(seed=42),
         )
 
         for old_study in old_studies:

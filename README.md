@@ -10,8 +10,8 @@ This tool is currently in an experimental stage.
 
 ## Supported files
 
+- csv files: see `dataset` for the supported format.
 - mpt files: assumes LSV experiments conducted using BioLogic EC-Lab.
-- csv files: assumes
 
 ## Installation
 
@@ -21,10 +21,10 @@ Requirements: Python 3.11 or above
 pip install tafel
 ```
 
-## Usage
+## How to use
 
 ```bash
-tafel -f path/to/mpt/file.mpt --reference-potential 0.210 --ph 13 --electrolyte-resistance 0.05
+tafel -f dataset/HER.csv
 ```
 
 ## For Developers
@@ -43,6 +43,12 @@ To check the code quality, run:
 
 ```bash
 pdm run check
+```
+
+To test CLI, run
+
+```
+pdm run python src/tafel/app/cli.py -f dataset/HER.csv
 ```
 
 ### Release a New PyPI Package

@@ -1,7 +1,7 @@
 import argparse
 
 from tafel.core.bo import BayesianOptimizer
-from tafel.core.reader import HokutoReader, Reader
+from tafel.core.reader import HokutoReader, Reader, SimpleXYReader
 
 
 def main() -> None:
@@ -15,12 +15,18 @@ def main() -> None:
         default="tafel_plot",
         help="Output directory name (default: tafel_plot)",
     )
-    parser.add_argument("-t", "--trials", type=int, default=100, help="Number of trials (default: 100)")
+    parser.add_argument(
+        "-t",
+        "--trials",
+        type=int,
+        default=1000,
+        help="Number of trials (default: 1000)",
+    )
     parser.add_argument(
         "--r2-threshold",
         type=float,
-        default=0.999,
-        help="R2 threshold (default: 0.999)",
+        default=0.998,
+        help="R2 threshold (default: 0.998)",
     )
     parser.add_argument("-l", "--lines", type=int, default=2, help="Number of lines (default: 2)")
 
@@ -64,6 +70,10 @@ def main() -> None:
             electrolyte_resistance=args.electrolyte_resistance,
         )
         reader.read_mpt(args.file)
+
+    elif ".csv" in args.file:
+        reader = SimpleXYReader()
+        reader.read_csv(args.file)
     elif ".CSV" in args.file:
         reader = HokutoReader(
             ph=args.ph,
