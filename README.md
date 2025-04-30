@@ -19,8 +19,16 @@ pip install tafel
 
 ## Usage
 
+### Bio-logic files
+
 ```bash
-tafel -f path/to/mpt/file.mpt --reference-potential 0.210 --ph 13 --electrolyte-resistance 0.05
+tafel -f path/to/file/file.mpt --reference-potential 0.210 --ph 13 --electrolyte-resistance 0.05
+```
+
+### Hokuto files
+
+```bash
+tafel -f path/to/file/file.xyz --reference-potential 0.210 --ph 13 --electrolyte-resistance 0.05
 ```
 
 ## For Developers

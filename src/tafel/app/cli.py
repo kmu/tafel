@@ -29,7 +29,7 @@ def main() -> None:
         "--points-threshold",
         type=int,
         default=5,
-        help="Number of points threshold (default: 10)",
+        help="Number of points threshold (default: 5)",
     )
     parser.add_argument(
         "-r",
