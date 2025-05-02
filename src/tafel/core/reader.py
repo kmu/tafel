@@ -8,7 +8,7 @@ import pandas as pd
 
 
 class SimpleXYReader:
-    def read_csv(self, path: str) -> None:
+    def read_xy(self, path: str) -> None:
         self.df = pd.read_csv(path)
 
     def get_tafel_plots(self):

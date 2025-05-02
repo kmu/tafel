@@ -73,7 +73,7 @@ def main() -> None:
 
     elif ".csv" in args.file:
         reader = SimpleXYReader()
-        reader.read_csv(args.file)
+        reader.read_xy(args.file)
     elif ".CSV" in args.file:
         reader = HokutoReader(
             ph=args.ph,
