@@ -10,8 +10,9 @@ This tool is currently in an experimental stage.
 
 ## Supported files
 
-- csv files: see `dataset` for the supported format.
-- mpt files: assumes LSV experiments conducted using BioLogic EC-Lab.
+- xy files: assumes simple xy format. See [here](dataset/HER.xy) for an example.
+- csv files: assumes LSV experiments conducted using Hokuto. See [here](tests/data/example2.CSV) for an example.
+- mpt files: assumes LSV experiments conducted using BioLogic EC-Lab. See [here](tests/data/example.mpt) for an example.
 
 ## Installation
 
