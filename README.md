@@ -9,6 +9,12 @@ A command-line tool for extracting Tafel slopes from MPT files.
 
 This tool is currently in an experimental stage.
 
+## Supported files
+
+- xy files: assumes simple xy format. See [here](dataset/HER.xy) for an example.
+- csv files: assumes LSV experiments conducted using Hokuto. See [here](tests/data/example2.CSV) for an example.
+- mpt files: assumes LSV experiments conducted using BioLogic EC-Lab. See [here](tests/data/example.mpt) for an example.
+
 ## Installation
 
 Requirements: Python 3.11 or above
@@ -17,7 +23,13 @@ Requirements: Python 3.11 or above
 pip install tafel
 ```
 
-## Usage
+## How to use
+
+### Simple xy files
+
+```
+tafel -f dataset/HER.csv
+```
 
 ### Bio-logic files
 
@@ -47,6 +59,12 @@ To check the code quality, run:
 
 ```bash
 pdm run check
+```
+
+To test CLI, run
+
+```
+pdm run python src/tafel/app/cli.py -f dataset/HER.csv
 ```
 
 ### Release a New PyPI Package

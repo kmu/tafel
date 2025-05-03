@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.9, 3.10, 3.11]
+        python-version: [3.11, 3.12]
 
     steps:
       - name: Checkout code
@@ -26,6 +26,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: true
+          cache-dependency-path: pdm.lock
 
       - name: Install dependencies
         run: pdm install --dev
