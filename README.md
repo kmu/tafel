@@ -1,5 +1,6 @@
 
 [![Python application](https://github.com/kmu/tafel/actions/workflows/test.yaml/badge.svg)](https://github.com/kmu/tafel/actions/workflows/test.yaml)
+[![codecov](https://codecov.io/gh/kmu/tafel/graph/badge.svg?token=E48EGKC5FQ)](https://codecov.io/gh/kmu/tafel)
 
 # Tafel
 
@@ -10,8 +11,9 @@ This tool is currently in an experimental stage.
 
 ## Supported files
 
-- csv files: see `dataset` for the supported format.
-- mpt files: assumes LSV experiments conducted using BioLogic EC-Lab.
+- xy files: assumes simple xy format. See [here](dataset/HER.xy) for an example.
+- csv files: assumes LSV experiments conducted using Hokuto. See [here](tests/data/example2.CSV) for an example.
+- mpt files: assumes LSV experiments conducted using BioLogic EC-Lab. See [here](tests/data/example.mpt) for an example.
 
 ## Installation
 
@@ -23,8 +25,22 @@ pip install tafel
 
 ## How to use
 
-```bash
+### Simple xy files
+
+```
 tafel -f dataset/HER.csv
+```
+
+### Bio-logic files
+
+```bash
+tafel -f path/to/file/file.mpt --reference-potential 0.210 --ph 13 --electrolyte-resistance 0.05
+```
+
+### Hokuto files
+
+```bash
+tafel -f path/to/file/file.xyz --reference-potential 0.210 --ph 13 --electrolyte-resistance 0.05
 ```
 
 ## For Developers

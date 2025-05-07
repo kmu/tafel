@@ -35,7 +35,7 @@ def main() -> None:
         "--points-threshold",
         type=int,
         default=5,
-        help="Number of points threshold (default: 10)",
+        help="Number of points threshold (default: 5)",
     )
     parser.add_argument(
         "-r",
@@ -73,7 +73,7 @@ def main() -> None:
 
     elif ".csv" in args.file:
         reader = SimpleXYReader()
-        reader.read_csv(args.file)
+        reader.read_xy(args.file)
     elif ".CSV" in args.file:
         reader = HokutoReader(
             ph=args.ph,
