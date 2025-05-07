@@ -1,6 +1,6 @@
 [project]
 name = "tafel"
-version = "2025.2.12"
+version = "2025.5.6"
 description = "A python package to extract Tafel slope"
 authors = [
     {name = "Koki Muraoka", email = "muraok_k@chemsys.t.u-tokyo.ac.jp"},
